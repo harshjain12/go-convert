@@ -19,10 +19,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/drone/go-convert/command"
-
 	"github.com/google/subcommands"
 	"net/http"
-	"os"
 )
 
 func runBinaryHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,32 +33,18 @@ func runBinaryHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Both input1 and input2 are required", http.StatusBadRequest)
 		return
 	}
-
 	flag.Parse()
 	ctx := context.Background()
 
-	// Here, replace with the actual path to your binary executable
-	// For this example, let's assume we have a simple binary that takes two strings as arguments
-	// cmd := exec.Command("./go-convert")
-	os.Exit(int(subcommands.Execute(ctx, param1, param2)))
+	var output []byte
+	output = new(command.Drone).ExecuteCommand(ctx, param2)
 
-	// Run the command and capture the output
-	//output, err := cmd.CombinedOutput()
-	//if err != nil {
-	//	http.Error(w, fmt.Sprintf("Error running binary: %v", err), http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//// Send the output back to the client
-	//w.WriteHeader(http.StatusOK)
-	//w.Write(output)
+	// Send the output back to the client
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
 }
 
 func main() {
-	subcommands.Register(new(command.Azure), "")
-	subcommands.Register(new(command.Bitbucket), "")
-	subcommands.Register(new(command.Circle), "")
-	subcommands.Register(new(command.Cloudbuild), "")
 	subcommands.Register(new(command.Drone), "")
 	subcommands.Register(new(command.Github), "")
 	subcommands.Register(new(command.Gitlab), "")
