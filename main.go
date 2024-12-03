@@ -15,15 +15,39 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"os"
-
+	"fmt"
 	"github.com/drone/go-convert/command"
-
 	"github.com/google/subcommands"
+	"net/http"
+	"os/exec"
 )
 
+func runBinaryHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse the query parameters for two string inputs
+	query := r.URL.Query()
+	param1 := query.Get("input1")
+	param2 := query.Get("input2")
+
+	if param1 == "" || param2 == "" {
+		http.Error(w, "Both input1 and input2 are required", http.StatusBadRequest)
+		return
+	}
+
+	// Here, replace with the actual path to your binary executable
+	// For this example, let's assume we have a simple binary that takes two strings as arguments
+	cmd := exec.Command("./go-convert", param1, param2)
+
+	// Run the command and capture the output
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error running binary: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the output back to the client
+	w.WriteHeader(http.StatusOK)
+	w.Write(output)
+}
 func main() {
 	subcommands.Register(new(command.Azure), "")
 	subcommands.Register(new(command.Bitbucket), "")
@@ -38,7 +62,11 @@ func main() {
 	subcommands.Register(new(command.JenkinsJson), "")
 	subcommands.Register(new(command.JenkinsXml), "")
 
-	flag.Parse()
-	ctx := context.Background()
-	os.Exit(int(subcommands.Execute(ctx)))
+	http.HandleFunc("/run", runBinaryHandler)
+
+	// Start the server
+	fmt.Println("Server starting on :8990...")
+	if err := http.ListenAndServe(":8990", nil); err != nil {
+		fmt.Println("Error starting server:", err)
+	}
 }
