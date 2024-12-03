@@ -15,11 +15,14 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"github.com/drone/go-convert/command"
+
 	"github.com/google/subcommands"
 	"net/http"
-	"os/exec"
+	"os"
 )
 
 func runBinaryHandler(w http.ResponseWriter, r *http.Request) {
