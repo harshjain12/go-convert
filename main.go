@@ -33,21 +33,26 @@ func runBinaryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flag.Parse()
+	ctx := context.Background()
+
 	// Here, replace with the actual path to your binary executable
 	// For this example, let's assume we have a simple binary that takes two strings as arguments
-	cmd := exec.Command("./go-convert", param1, param2)
+	// cmd := exec.Command("./go-convert")
+	os.Exit(int(subcommands.Execute(ctx, param1, param2)))
 
 	// Run the command and capture the output
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error running binary: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Send the output back to the client
-	w.WriteHeader(http.StatusOK)
-	w.Write(output)
+	//output, err := cmd.CombinedOutput()
+	//if err != nil {
+	//	http.Error(w, fmt.Sprintf("Error running binary: %v", err), http.StatusInternalServerError)
+	//	return
+	//}
+	//
+	//// Send the output back to the client
+	//w.WriteHeader(http.StatusOK)
+	//w.Write(output)
 }
+
 func main() {
 	subcommands.Register(new(command.Azure), "")
 	subcommands.Register(new(command.Bitbucket), "")
